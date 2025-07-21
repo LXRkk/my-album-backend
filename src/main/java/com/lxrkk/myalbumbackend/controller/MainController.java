@@ -2,6 +2,7 @@ package com.lxrkk.myalbumbackend.controller;
 
 import com.lxrkk.myalbumbackend.common.BaseResponse;
 import com.lxrkk.myalbumbackend.common.ResultUtils;
+import io.swagger.annotations.Api;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/")
+@Api(tags = "健康检查接口")
 public class MainController {
 
     /**
