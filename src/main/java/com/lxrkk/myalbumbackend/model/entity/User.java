@@ -2,6 +2,7 @@ package com.lxrkk.myalbumbackend.model.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import lombok.Data;
@@ -13,7 +14,7 @@ import lombok.Data;
  */
 @TableName(value = "user")
 @Data
-public class User {
+public class User implements Serializable {
     /**
      * id
      */
@@ -70,4 +71,7 @@ public class User {
      */
     @TableLogic
     private Integer isDelete;
+
+    @TableField(exist = false)
+    private static final long serialVersionUID = 1L;
 }
