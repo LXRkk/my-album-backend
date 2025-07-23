@@ -12,12 +12,10 @@ import com.lxrkk.myalbumbackend.exception.BusinessException;
 import com.lxrkk.myalbumbackend.exception.ErrorCode;
 import com.lxrkk.myalbumbackend.exception.ThrowUtils;
 import com.lxrkk.myalbumbackend.manager.CosManager;
-import com.lxrkk.myalbumbackend.model.dto.picture.PictureEditRequest;
-import com.lxrkk.myalbumbackend.model.dto.picture.PictureQueryRequest;
-import com.lxrkk.myalbumbackend.model.dto.picture.PictureUpdateRequest;
-import com.lxrkk.myalbumbackend.model.dto.picture.PictureUploadRequest;
+import com.lxrkk.myalbumbackend.model.dto.picture.*;
 import com.lxrkk.myalbumbackend.model.entity.Picture;
 import com.lxrkk.myalbumbackend.model.entity.User;
+import com.lxrkk.myalbumbackend.model.enums.PictureReviewStatusEnum;
 import com.lxrkk.myalbumbackend.model.vo.PictureTagCategory;
 import com.lxrkk.myalbumbackend.model.vo.PictureVO;
 import com.lxrkk.myalbumbackend.service.PictureService;
@@ -62,11 +60,11 @@ public class FileController {
     private PictureService pictureService;
 
     /**
-     * 上传图片(仅管理员)，可以重新上传
+     * 上传图片，可以重新上传
      */
-    @ApiOperation("上传图片(仅管理员)")
+    @ApiOperation("上传图片")
     @PostMapping("/upload")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    // @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<PictureVO> uploadPicture(@RequestPart("file") MultipartFile multipartFile,
                                                  PictureUploadRequest pictureUploadRequest,
                                                  HttpServletRequest request) {
@@ -74,6 +72,34 @@ public class FileController {
         PictureVO pictureVO = pictureService.uploadPicture(multipartFile, pictureUploadRequest, loginUser);
         return ResultUtils.success(pictureVO);
     }
+
+    /**
+     * 通过 URL 上传图片（可重新上传）
+     */
+    @ApiOperation("通过 URL 上传图片（可重新上传）")
+    @PostMapping("/upload/url")
+    public BaseResponse<PictureVO> uploadPictureByUrl(@RequestBody PictureUploadRequest pictureUploadRequest,
+                                                      HttpServletRequest request) {
+        String fileUrl = pictureUploadRequest.getFileUrl();
+        User loginUser = userService.getLoginUser(request);
+        PictureVO pictureVO = pictureService.uploadPicture(fileUrl, pictureUploadRequest, loginUser);
+        return ResultUtils.success(pictureVO);
+    }
+
+    /**
+     * 批量抓取图片并上传(管理员)
+     */
+    @ApiOperation("批量抓取图片并上传(管理员)")
+    @PostMapping("/upload/batch")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<Integer> uploadPictureByBatch(@RequestBody PictureUploadByBatchRequest pictureUploadByBatchRequest,
+                                                      HttpServletRequest request) {
+        ThrowUtils.throwIf(pictureUploadByBatchRequest == null, ErrorCode.PARAMS_ERROR);
+        User loginUser = userService.getLoginUser(request);
+        Integer uploadCount = pictureService.uploadPictureByBatch(pictureUploadByBatchRequest, loginUser);
+        return ResultUtils.success(uploadCount);
+    }
+
 
     /**
      * 删除图片(仅本人或管理员)
@@ -103,7 +129,7 @@ public class FileController {
     @ApiOperation("更新图片(管理员)")
     @PostMapping("/update")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<Boolean> updatePicture(@RequestBody PictureUpdateRequest pictureUpdateRequest) {
+    public BaseResponse<Boolean> updatePicture(@RequestBody PictureUpdateRequest pictureUpdateRequest, HttpServletRequest request) {
         ThrowUtils.throwIf(pictureUpdateRequest == null || pictureUpdateRequest.getId() <= 0, ErrorCode.PARAMS_ERROR);
         // dto 转 entity
         Picture picture = new Picture();
@@ -116,6 +142,9 @@ public class FileController {
         Long pictureId = pictureUpdateRequest.getId();
         Picture oldPicture = pictureService.getById(pictureId);
         ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR);
+        // 补充审核参数
+        User loginUser = userService.getLoginUser(request);
+        pictureService.fillReviewParams(picture, loginUser);
         // 更新
         boolean result = pictureService.updateById(picture);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "更新失败");
@@ -175,6 +204,8 @@ public class FileController {
         int pageSize = pictureQueryRequest.getPageSize();
         // 限制爬虫
         ThrowUtils.throwIf(pageSize > 20, ErrorCode.PARAMS_ERROR);
+        // 普通用户默认只能查看审核通过的图片
+        pictureQueryRequest.setReviewStatus(PictureReviewStatusEnum.PASS.getValue());
         Page<Picture> page = pictureService.page(new Page<>(current, pageSize),
                 pictureService.getQueryWrapper(pictureQueryRequest));
         Page<PictureVO> pictureVOPage = pictureService.getPictureVOPage(page, request);
@@ -205,6 +236,8 @@ public class FileController {
         if (!userService.isAdmin(loginUser) && !oldPicture.getUserId().equals(loginUser.getId())) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
+        // 补充审核参数
+        pictureService.fillReviewParams(picture, loginUser);
         // 数据库更新
         boolean result = pictureService.updateById(picture);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "更新失败!");
@@ -290,5 +323,18 @@ public class FileController {
                 coi.close();
             }
         }
+    }
+
+    /**
+     * 图片审核
+     */
+    @ApiOperation("图片审核(管理员)")
+    @PostMapping("/review")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<Boolean> doPictureReview(@RequestBody PictureReviewRequest pictureReviewRequest, HttpServletRequest request) {
+        ThrowUtils.throwIf(pictureReviewRequest == null || pictureReviewRequest.getId() <= 0, ErrorCode.PARAMS_ERROR);
+        User loginUser = userService.getLoginUser(request);
+        pictureService.doPictureReview(pictureReviewRequest, loginUser);
+        return ResultUtils.success(true);
     }
 }

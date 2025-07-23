@@ -3,6 +3,8 @@ package com.lxrkk.myalbumbackend.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lxrkk.myalbumbackend.model.dto.picture.PictureQueryRequest;
+import com.lxrkk.myalbumbackend.model.dto.picture.PictureReviewRequest;
+import com.lxrkk.myalbumbackend.model.dto.picture.PictureUploadByBatchRequest;
 import com.lxrkk.myalbumbackend.model.dto.picture.PictureUploadRequest;
 import com.lxrkk.myalbumbackend.model.entity.Picture;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -22,12 +24,12 @@ public interface PictureService extends IService<Picture> {
     /**
      * 上传图片
      *
-     * @param multipartFile        文件
+     * @param inputSource        文件源
      * @param pictureUploadRequest 上传图片参数
      * @param loginUser            登录用户
-     * @return
+     * @return 脱敏后的图片信息
      */
-    PictureVO uploadPicture(MultipartFile multipartFile, PictureUploadRequest pictureUploadRequest, User loginUser);
+    PictureVO uploadPicture(Object inputSource, PictureUploadRequest pictureUploadRequest, User loginUser);
 
     /**
      * 将查询请求转为 QueryWrapper 对象
@@ -55,4 +57,26 @@ public interface PictureService extends IService<Picture> {
      * @param picture  图片
      */
     void validPicture(Picture picture);
+
+    /**
+     * 图片审核
+     * @param pictureReviewRequest 图片审核请求
+     * @param loginUser 管理员
+     */
+    void doPictureReview(PictureReviewRequest pictureReviewRequest, User loginUser);
+
+    /**
+     * 填充审核参数
+     * @param picture 图片
+     * @param loginUser 当前登录用户
+     */
+    void fillReviewParams(Picture picture, User loginUser);
+
+    /**
+     * 批量抓取并上传图片
+     * @param pictureUploadByBatchRequest 图片上传批量请求
+     * @param loginUser 当前登录用户
+     * @return 成功上传的图片数量
+     */
+    Integer uploadPictureByBatch(PictureUploadByBatchRequest pictureUploadByBatchRequest, User loginUser);
 }
