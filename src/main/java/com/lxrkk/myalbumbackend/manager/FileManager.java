@@ -75,7 +75,7 @@ public class FileManager {
             int width = imageInfo.getWidth(); // 图片宽度
             int height = imageInfo.getHeight(); // 图片高度
             double picScale = NumberUtil.round(width * 1.0 / height, 2).doubleValue(); // 图片宽高比
-            uploadPictureResult.setPicName(FileUtil.getName(originalFilename));
+            uploadPictureResult.setPicName(FileUtil.mainName(originalFilename));
             uploadPictureResult.setPicWidth(width);
             uploadPictureResult.setPicHeight(height);
             uploadPictureResult.setPicScale(picScale);
@@ -102,7 +102,7 @@ public class FileManager {
     public UploadPictureResult uploadPictureByUrl(String fileUrl, String uploadPathPrefix) {
         // 图片上传地址
         String uuid = RandomUtil.randomString(16);
-        String originalFilename = FileUtil.getName(fileUrl);
+        String originalFilename = FileUtil.mainName(fileUrl);
         String uploadFilename = String.format("%s_%s.%s",
                 DateUtil.formatDate(new Date()), uuid, FileUtil.getSuffix(originalFilename));
         String uploadPath = String.format("%s/%s", uploadPathPrefix, uploadFilename);
@@ -119,7 +119,7 @@ public class FileManager {
             int width = imageInfo.getWidth(); // 图片宽度
             int height = imageInfo.getHeight(); // 图片高度
             double picScale = NumberUtil.round(width * 1.0 / height, 2).doubleValue(); // 图片宽高比
-            uploadPictureResult.setPicName(FileUtil.getName(originalFilename));
+            uploadPictureResult.setPicName(FileUtil.mainName(originalFilename));
             uploadPictureResult.setPicWidth(width);
             uploadPictureResult.setPicHeight(height);
             uploadPictureResult.setPicScale(picScale);

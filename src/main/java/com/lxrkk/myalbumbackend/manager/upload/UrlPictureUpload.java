@@ -89,7 +89,7 @@ public class UrlPictureUpload extends PictureUploadTemplate {
     protected String getOriginalFilename(Object inputSource) {
         String fileUrl = (String) inputSource;
         // 从 URL 中获取文件名
-        return FileUtil.getName(fileUrl);
+        return FileUtil.mainName(fileUrl);
     }
 
     /**

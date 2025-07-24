@@ -53,6 +53,12 @@ public interface PictureService extends IService<Picture> {
     Page<PictureVO> getPictureVOPage(Page<Picture> picturePage, HttpServletRequest request);
 
     /**
+     * 清理图片文件
+     * @param oldPicture  图片
+     */
+    void clearPictureFile(Picture oldPicture);
+
+    /**
      * 图片数据校验
      * @param picture  图片
      */
