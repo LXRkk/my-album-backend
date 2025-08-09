@@ -2,10 +2,7 @@ package com.lxrkk.myalbumbackend.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.lxrkk.myalbumbackend.model.dto.picture.PictureQueryRequest;
-import com.lxrkk.myalbumbackend.model.dto.picture.PictureReviewRequest;
-import com.lxrkk.myalbumbackend.model.dto.picture.PictureUploadByBatchRequest;
-import com.lxrkk.myalbumbackend.model.dto.picture.PictureUploadRequest;
+import com.lxrkk.myalbumbackend.model.dto.picture.*;
 import com.lxrkk.myalbumbackend.model.entity.Picture;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.lxrkk.myalbumbackend.model.entity.User;
@@ -53,6 +50,20 @@ public interface PictureService extends IService<Picture> {
     Page<PictureVO> getPictureVOPage(Page<Picture> picturePage, HttpServletRequest request);
 
     /**
+     * 编辑图片
+     * @param pictureEditRequest
+     * @param loginUser
+     */
+    void editPicture(PictureEditRequest pictureEditRequest, User loginUser);
+
+    /**
+     * 删除图片
+     * @param pictureId 图片id
+     * @param loginUser 登录用户
+     */
+    void deletePicture(long pictureId, User loginUser);
+
+    /**
      * 清理图片文件
      * @param oldPicture  图片
      */
@@ -63,6 +74,13 @@ public interface PictureService extends IService<Picture> {
      * @param picture  图片
      */
     void validPicture(Picture picture);
+
+    /**
+     * 图片权限校验
+     * @param loginUser
+     * @param picture
+     */
+    void checkPictureAuth(User loginUser, Picture picture);
 
     /**
      * 图片审核
