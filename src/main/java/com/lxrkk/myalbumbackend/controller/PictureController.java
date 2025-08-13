@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.lxrkk.myalbumbackend.annotation.AuthCheck;
+import com.lxrkk.myalbumbackend.api.imageSearch.ImageSearchApiFacade;
+import com.lxrkk.myalbumbackend.api.imageSearch.model.ImageSearchResult;
 import com.lxrkk.myalbumbackend.common.BaseResponse;
 import com.lxrkk.myalbumbackend.common.DeleteRequest;
 import com.lxrkk.myalbumbackend.common.ResultUtils;
@@ -237,6 +239,32 @@ public class PictureController {
     }
 
     /**
+     * 以图搜图
+     */
+    @ApiOperation("以图搜图")
+    @PostMapping("/search/picture")
+    public BaseResponse<List<ImageSearchResult>> searchPictureByPicture(@RequestBody SearchPictureByPictureRequest searchPictureByPictureRequest) {
+        ThrowUtils.throwIf(searchPictureByPictureRequest == null, ErrorCode.PARAMS_ERROR);
+        Long pictureId = searchPictureByPictureRequest.getPictureId();
+        ThrowUtils.throwIf(pictureId == null || pictureId <= 0, ErrorCode.PARAMS_ERROR);
+        Picture oldPicture = pictureService.getById(pictureId);
+        ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR, "图片不存在");
+        List<ImageSearchResult> resultList = ImageSearchApiFacade.searchImage(oldPicture.getUrl());
+        return ResultUtils.success(resultList);
+    }
+
+    @ApiOperation("颜色搜图")
+    @PostMapping("/search/color")
+    public BaseResponse<List<PictureVO>> searchPictureByColor(@RequestBody SearchPictureByColorRequest searchPictureByColorRequest, HttpServletRequest request) {
+        ThrowUtils.throwIf(searchPictureByColorRequest == null, ErrorCode.PARAMS_ERROR);
+        String picColor = searchPictureByColorRequest.getPicColor();
+        Long spaceId = searchPictureByColorRequest.getSpaceId();
+        User loginUser = userService.getLoginUser(request);
+        List<PictureVO> result = pictureService.searchPictureByColor(spaceId, picColor, loginUser);
+        return ResultUtils.success(result);
+    }
+
+    /**
      * 使用缓存分页获取图片列表(普通用户)
      */
     @ApiOperation("使用缓存分页获取图片列表(普通用户)")
@@ -301,6 +329,22 @@ public class PictureController {
         User loginUser = userService.getLoginUser(request);
         ThrowUtils.throwIf(loginUser == null, ErrorCode.NOT_LOGIN_ERROR);
         pictureService.editPicture(pictureEditRequest, loginUser);
+        return ResultUtils.success(true);
+    }
+
+    /**
+     * 批量修改图片
+     * @param pictureEditByBatchRequest
+     * @param request
+     * @return
+     */
+    @ApiOperation("批量修改")
+    @PostMapping("/edit/batch")
+    public BaseResponse<Boolean> editPictureBatch(@RequestBody PictureEditByBatchRequest pictureEditByBatchRequest, HttpServletRequest request) {
+        ThrowUtils.throwIf(pictureEditByBatchRequest == null, ErrorCode.PARAMS_ERROR);
+        User loginUser = userService.getLoginUser(request);
+        ThrowUtils.throwIf(loginUser == null, ErrorCode.NOT_LOGIN_ERROR);
+        pictureService.editPictureByBatch(pictureEditByBatchRequest, loginUser);
         return ResultUtils.success(true);
     }
 

@@ -71,6 +71,11 @@ public class Picture implements Serializable {
     private Double picScale;
 
     /**
+     * 图片主色调
+     */
+    private String picColor;
+
+    /**
      * 图片格式
      */
     private String picFormat;
