@@ -226,6 +226,20 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
             space.setMaxCount(maxCount);
         }
     }
+
+    /**
+     * 检查空间权限
+     *
+     * @param loginUser 登录用户
+     * @param space     空间
+     */
+    @Override
+    public void checkSpaceAuth(User loginUser, Space space) {
+        // 仅本人或管理员可操作
+        if (!userService.isAdmin(loginUser) && !space.getUserId().equals(loginUser.getId())) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+    }
 }
 
 
