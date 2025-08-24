@@ -2,6 +2,8 @@ package com.lxrkk.myalbumbackend.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.lxrkk.myalbumbackend.api.aliyunai.model.CreateOutPaintingTaskRequest;
+import com.lxrkk.myalbumbackend.api.aliyunai.model.CreateOutPaintingTaskResponse;
 import com.lxrkk.myalbumbackend.model.dto.picture.*;
 import com.lxrkk.myalbumbackend.model.entity.Picture;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -121,4 +123,12 @@ public interface PictureService extends IService<Picture> {
      * @return 成功上传的图片数量
      */
     Integer uploadPictureByBatch(PictureUploadByBatchRequest pictureUploadByBatchRequest, User loginUser);
+
+    /**
+     * 创建扩图任务
+     * @param createPictureOutPaintingTaskRequest
+     * @param loginUser
+     * @return
+     */
+    CreateOutPaintingTaskResponse createPictureOutPaintingTask(CreatePictureOutPaintingTaskRequest createPictureOutPaintingTaskRequest, User loginUser);
 }

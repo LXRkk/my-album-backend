@@ -2,6 +2,10 @@ server:
   port: 8123 # 服务端口
   servlet:
     context-path: /api # 访问前缀
+    # cookie 30 天过期
+    session:
+      cookie:
+        max-age: 2592000
 
 
 spring:
@@ -59,3 +63,7 @@ knife4j:
 #    secretKey: xxx
 #    region: xxx
 #    bucket: xxx
+
+# 阿里云 AI 配置
+#aliYunAi:
+#  apiKey: xxxx

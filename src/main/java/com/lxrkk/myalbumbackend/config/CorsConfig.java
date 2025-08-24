@@ -13,7 +13,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  */
 @Configuration
 // 全局跨域配置只在开发环境使用
-@Profile("dev")
+@Profile({"dev", "local"})
 public class CorsConfig implements WebMvcConfigurer {
 
     @Override
